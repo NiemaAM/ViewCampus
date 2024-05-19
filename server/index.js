@@ -9,10 +9,10 @@ app.use(express.json());
 // User Signup
 app.post("/signup", async (req, res) => {
     try {
-        const { first_name, last_name, email, password, profil_type } = req.body;
+        const { profil_id, first_name, last_name, email, password, profil_type } = req.body;
         const newUser = await pool.query(
-            "INSERT INTO profil (first_name, last_name, email, password, profil_type) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-            [first_name, last_name, email, password, profil_type]
+            "INSERT INTO profil (profil_id, first_name, last_name, email, password, profil_type) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+            [profil_id, first_name, last_name, email, password, profil_type]
         );
         res.json(newUser.rows[0]);
     } catch (error) {
@@ -98,8 +98,8 @@ app.put("/events/:id", async (req, res) => {
 app.delete("/events/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        const { profil_id } = req.body;
-        const deleteEvent = await pool.query("DELETE FROM event WHERE event_id = $1 AND profil_id = $2", [id, profil_id]);
+        //const { profil_id } = req.body;
+        const deleteEvent = await pool.query("DELETE FROM event WHERE event_id = $1", [id]);
         res.json({ message: "Event deleted!" });
     } catch (error) {
         console.error(error.message);
