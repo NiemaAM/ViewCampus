@@ -243,5 +243,29 @@ EXECUTE FUNCTION check_event_type_and_profile();
 
 SELECT * FROM EVENT;
 
+SELECT
+    profil_id,
+    COUNT(*) AS Number_Of_Bookings_per_week
+FROM
+    EVENT
+WHERE
+    start_date_time >= '2024-05-13'  
+    AND start_date_time < '2024-05-20'  
+GROUP BY
+    profil_id;
+
+SELECT
+    name,
+    description,
+    start_date_time,
+    end_date_time,
+    room_number,
+    building_number
+FROM
+    event
+WHERE
+    building_number = '8B';  
+
+
 
 
