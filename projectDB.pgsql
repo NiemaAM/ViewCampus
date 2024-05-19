@@ -262,9 +262,12 @@ SELECT
     room_number,
     building_number
 FROM
-    event
+    EVENT JOIN BOOK ON EVENT.event_id=BOOK.event_id
 WHERE
-    building_number = '8B';  
+    building_number = '8B'
+ORDER BY   
+   e.start_date_time DESC;
+;  
 
 
 
