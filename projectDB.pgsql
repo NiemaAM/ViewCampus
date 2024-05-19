@@ -269,6 +269,8 @@ ORDER BY
    e.start_date_time DESC;
 ;  
 
+CREATE VIEW List_of_Events AS (SELECT  name, description, start_date_time AS From, end_date_time AS To,
+event_type AS Type, room_number AS Room, building_number AS Building FROM EVENT );
 
 
 
