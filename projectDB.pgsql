@@ -84,7 +84,7 @@ CREATE TABLE EVENT (
     end_date_time TIMESTAMP NOT NULL,
 
     event_type VARCHAR(50) CHECK (event_type IN ('club', 'class')),
-    
+
 --for simplification of the app only
     room_number INT CHECK (BETWEEN(1, 200)),
     building_number VARCHAR(2) NOT NULL,
@@ -147,6 +147,8 @@ CREATE TABLE BOOK (
 INSERT INTO profil(profil_id, first_name, last_name, email, password, profil_type) 
 VALUES
 (157755, 'niema', 'alaoui mdaghri', 'n.alaouimdaghri@aui.ma', '123', 'student');
+
+SELECT * FROM profil WHERE email = 'n.alaouimdaghri@aui.ma' AND password = '123';
 
 INSERT INTO event(profil_id, start_date_time, end_date_time, name, description, event_type, room_number, building_number) 
 VALUES 
@@ -239,6 +241,7 @@ BEFORE INSERT ON EVENT
 FOR EACH ROW
 EXECUTE FUNCTION check_event_type_and_profile();
 
+SELECT * FROM EVENT;
 
 
 
