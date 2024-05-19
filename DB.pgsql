@@ -138,13 +138,17 @@ CREATE TABLE BOOK (
     FOREIGN KEY (room_number, building_number) REFERENCES ROOM(room_number, building_number)
 );
 
--- Dummy data for PROFIL table
-INSERT INTO PROFIL (profil_id, first_name, last_name, email, password, profil_type)
+//-- Dummy data for PROFIL table
+//INSERT INTO PROFIL (profil_id, first_name, last_name, email, password, profil_type)
+//VALUES
+//    (1, 'John', 'Doe', 'john.doe@example.com', 'password123', 'student'),
+//    (2, 'Jane', 'Smith', 'jane.smith@example.com', 'password456', 'staff'),
+//    (3, 'Michael', 'Johnson', 'michael.johnson@example.com', 'password789', 'professor'),
+//    (4, 'Emily', 'Brown', 'emily.brown@example.com', 'passwordabc', 'guest');
+
+INSERT INTO profil(profil_id, first_name, last_name, email, password, profil_type) 
 VALUES
-    (1, 'John', 'Doe', 'john.doe@example.com', 'password123', 'student'),
-    (2, 'Jane', 'Smith', 'jane.smith@example.com', 'password456', 'staff'),
-    (3, 'Michael', 'Johnson', 'michael.johnson@example.com', 'password789', 'professor'),
-    (4, 'Emily', 'Brown', 'emily.brown@example.com', 'passwordabc', 'guest');
+(157755, 'niema', 'alaoui mdaghri', 'n.alaouimdaghri@aui.ma', '123', 'student');
 
 -- Dummy data for STUDENT table
 INSERT INTO STUDENT (profil_id, major)
@@ -196,10 +200,14 @@ VALUES
     (4, 987654321);
 
 -- Dummy data for EVENT table
-INSERT INTO EVENT (profil_id, start_date_time, end_date_time, name, description, event_type)
-VALUES
-    (1, '2024-05-10 10:00:00', '2024-05-10 12:00:00', 'Computer Club Meeting', 'Regular meeting of the Computer Club', 'club'),
-    (3, '2024-05-15 13:00:00', '2024-05-15 15:00:00', 'CS101 Lecture', 'Introduction to Computer Science lecture', 'class');
+//INSERT INTO EVENT (profil_id, start_date_time, end_date_time, name, description, event_type)
+//VALUES
+//    (1, '2024-05-10 10:00:00', '2024-05-10 12:00:00', 'Computer Club Meeting', 'Regular meeting of the Computer Club', 'club'),
+//    (3, '2024-05-15 13:00:00', '2024-05-15 15:00:00', 'CS101 Lecture', 'Introduction to Computer Science lecture', 'class');
+
+INSERT INTO event(profil_id, start_date_time, end_date_time, name, description, event_type, room_number, building_number) 
+VALUES 
+(157755, '2024-05-20 10:00:00', '2024-05-20 12:00:00', 'event1', 'decsrption for event 1', 'club', '102', '8B');
 
 -- Dummy data for CLUB_EVENT table
 INSERT INTO CLUB_EVENT (event_id, club_id)
