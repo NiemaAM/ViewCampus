@@ -153,7 +153,7 @@ VALUES
 -- Dummy data for STUDENT table
 INSERT INTO STUDENT (profil_id, major)
 VALUES
-    (1, 'Computer Science');
+    (157755, 'Computer Science');
 
 -- Dummy data for CLUB table
 INSERT INTO CLUB (advisor_id, name)
