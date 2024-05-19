@@ -21,6 +21,7 @@ CREATE TABLE PROFIL (
     AND last_name NOT LIKE '%[^0-9!@#$%^&*()-_=+{}|;:",<>?/\\~`\[\]]%')
 );
 
+
 CREATE TABLE STUDENT (
     profil_id INT PRIMARY KEY REFERENCES PROFIL(profil_id),
     major VARCHAR(255) NOT NULL
@@ -76,16 +77,21 @@ CREATE TABLE EVENT (
     event_id SERIAL PRIMARY KEY,
     profil_id INT REFERENCES PROFIL(profil_id) NOT NULL,
 
-    start_date_time TIMESTAMP NOT NULL,
-    end_date_time TIMESTAMP NOT NULL,
-
     name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
 
+    start_date_time TIMESTAMP NOT NULL,
+    end_date_time TIMESTAMP NOT NULL,
+
     event_type VARCHAR(50) CHECK (event_type IN ('club', 'class')),
+    
+--for simplification of the app only
+    room_number INT CHECK (BETWEEN(1, 200)),
+    building_number VARCHAR(2) NOT NULL,
 
     CONSTRAINT check_end_after_start CHECK (end_date_time > start_date_time)
 );
+
 
 CREATE TABLE CLUB_EVENT (
     event_id INT PRIMARY KEY REFERENCES EVENT(event_id),
@@ -138,116 +144,65 @@ CREATE TABLE BOOK (
     FOREIGN KEY (room_number, building_number) REFERENCES ROOM(room_number, building_number)
 );
 
--- Dummy data for PROFIL table
-INSERT INTO PROFIL (profil_id, first_name, last_name, email, password, profil_type)
+INSERT INTO profil(profil_id, first_name, last_name, email, password, profil_type) 
 VALUES
-    (1, 'John', 'Doe', 'john.doe@example.com', 'password123', 'student'),
-    (2, 'Jane', 'Smith', 'jane.smith@example.com', 'password456', 'staff'),
-    (3, 'Michael', 'Johnson', 'michael.johnson@example.com', 'password789', 'professor'),
-    (4, 'Emily', 'Brown', 'emily.brown@example.com', 'passwordabc', 'guest');
+(157755, 'niema', 'alaoui mdaghri', 'n.alaouimdaghri@aui.ma', '123', 'student');
 
--- Dummy data for STUDENT table
-INSERT INTO STUDENT (profil_id, major)
-VALUES
-    (1, 'Computer Science');
+INSERT INTO event(profil_id, start_date_time, end_date_time, name, description, event_type, room_number, building_number) 
+VALUES 
+(157755, '2024-05-20 10:00:00', '2024-05-20 12:00:00', 'event1', 'decsrption for event 1', 'club', '102', '8B');
 
--- Dummy data for CLUB table
-INSERT INTO CLUB (advisor_id, name)
-VALUES
-    (2, 'Computer Club'),
-    (3, 'Chess Club');
+DROP FUNCTION check_time();
+DROP FUNCTION check_conflict();
+DROP TRIGGER IF EXISTS trigger_time ON event;
+DROP TRIGGER IF EXISTS trigger_conflict ON event;
 
--- Dummy data for MEMBER table
-INSERT INTO MEMBER (student_id, club_id)
-VALUES
-    (1, 1),
-    (1, 2);
+-- Create the function check_time()
+CREATE OR REPLACE FUNCTION check_time()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.start_date_time > NEW.end_date_time THEN
+        RAISE EXCEPTION 'The event starting time must be before the event ending time!';
+    END IF;
 
--- Dummy data for BOARD table
-INSERT INTO BOARD (student_id, club_id)
-VALUES
-    (1, 1);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
--- Dummy data for STAFF table
-INSERT INTO STAFF (profil_id, job_title)
-VALUES
-    (2, 'Administrator');
+-- Create the trigger trigger_time
+CREATE TRIGGER trigger_time
+BEFORE INSERT OR UPDATE
+ON event
+FOR EACH ROW
+EXECUTE PROCEDURE check_time();
 
--- Dummy data for PROFESSOR table
-INSERT INTO PROFESSOR (profil_id, office, phone)
-VALUES
-    (3, 101, 123456789);
+CREATE OR REPLACE FUNCTION check_conflict()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM event 
+        WHERE ((start_date_time <= NEW.start_date_time AND end_date_time >= NEW.start_date_time)
+            OR (start_date_time <= NEW.end_date_time AND end_date_time >= NEW.end_date_time)
+            OR (start_date_time >= NEW.start_date_time AND start_date_time <= NEW.end_date_time))
+            AND room_number = NEW.room_number 
+            AND building_number = NEW.building_number
+            AND event_id != NEW.event_id
+    ) THEN
+        RAISE EXCEPTION 'There is a time conflict with an existing event!';
+    END IF;
 
--- Dummy data for COURSE table
-INSERT INTO COURSE (course_code, school, name)
-VALUES
-    ('CS101', 'Computer Science', 'Introduction to Computer Science'),
-    ('MATH101', 'Mathematics', 'Algebra');
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
--- Dummy data for CLASS table
-INSERT INTO CLASS (professor_id, course_code)
-VALUES
-    (3, 'CS101'),
-    (3, 'MATH101');
+-- Create the trigger trigger_conflict
+CREATE TRIGGER trigger_conflict
+BEFORE INSERT OR UPDATE
+ON event
+FOR EACH ROW
+EXECUTE PROCEDURE check_conflict();
 
--- Dummy data for GUEST table
-INSERT INTO GUEST (profil_id, phone)
-VALUES
-    (4, 987654321);
-
--- Dummy data for EVENT table
-INSERT INTO EVENT (profil_id, start_date_time, end_date_time, name, description, event_type)
-VALUES
-    (1, '2024-05-10 10:00:00', '2024-05-10 12:00:00', 'Computer Club Meeting', 'Regular meeting of the Computer Club', 'club'),
-    (3, '2024-05-15 13:00:00', '2024-05-15 15:00:00', 'CS101 Lecture', 'Introduction to Computer Science lecture', 'class');
-
--- Dummy data for CLUB_EVENT table
-INSERT INTO CLUB_EVENT (event_id, club_id)
-VALUES
-    (1, 1);
-
--- Dummy data for CLASS_EVENT table
-INSERT INTO CLASS_EVENT (event_id, course_code)
-VALUES
-    (2, 'CS101');
-
--- Dummy data for NOTIFICATION table
-INSERT INTO NOTIFICATION (profil_id, event_id, message)
-VALUES
-    (1, 1, 'Reminder: Computer Club meeting tomorrow.');
-
--- Dummy data for BUILDING table
-INSERT INTO BUILDING (building_number, floors)
-VALUES
-    ('B1', 3),
-    ('B2', 4);
-
--- Dummy data for ROOM table
-INSERT INTO ROOM (room_number, building_number, capacity)
-VALUES
-    (101, 'B1', 30),
-    (102, 'B1', 25),
-    (201, 'B2', 35),
-    (202, 'B2', 40);
-
--- Dummy data for EQUIPMENT table
-INSERT INTO EQUIPMENT (name)
-VALUES
-    ('Projector'),
-    ('Whiteboard'),
-    ('Microphone');
-
--- Dummy data for EQUIPED table
-INSERT INTO EQUIPED (equipment_id, room_number, building_number, quantity)
-VALUES
-    (1, 101, 'B1', 1),
-    (2, 101, 'B1', 2),
-    (3, 202, 'B2', 1);
-
--- Dummy data for BOOK table
-INSERT INTO BOOK (event_id, room_number, building_number)
-VALUES
-    (1, 101, 'B1');
 
 CREATE OR REPLACE FUNCTION check_event_type_and_profile()
 RETURNS TRIGGER AS $$
@@ -284,28 +239,6 @@ BEFORE INSERT ON EVENT
 FOR EACH ROW
 EXECUTE FUNCTION check_event_type_and_profile();
 
-CREATE OR REPLACE FUNCTION overlapping_events()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM EVENT 
-        WHERE NEW.start_date_time < end_date_time
-        AND NEW.end_date_time > start_date_time
-    ) AND EXISTS (
-        SELECT 1
-        FROM BOOK 
-        WHERE room_number = NEW.room_number 
-        AND building_number = NEW.building_number
-    ) THEN
-        RAISE EXCEPTION 'Time conflict.';
-    END IF;
-    
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE TRIGGER check_overlapping_events
-BEFORE INSERT OR UPDATE ON BOOK
-FOR EACH ROW
-EXECUTE FUNCTION overlapping_events();
+
+
